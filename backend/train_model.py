@@ -1,0 +1,101 @@
+import pandas as pd
+import xgboost as xgb
+from sklearn.ensemble import RandomForestClassifier
+import pickle
+import json
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, roc_auc_score, precision_score, recall_score, f1_score, confusion_matrix
+import os
+
+def train():
+    if not os.path.exists('synthetic_data.csv'):
+        print("Data not found. Please run generate_data.py first.")
+        return
+
+    # Load data
+    df = pd.read_csv('synthetic_data.csv')
+    X = df.drop(columns=['loan_default'])
+    y = df['loan_default']
+    
+    # Train-test split
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    # --- XGBoost Model ---
+    xgb_model = xgb.XGBClassifier(
+        n_estimators=100,
+        max_depth=5,
+        learning_rate=0.1,
+        random_state=42,
+        eval_metric='logloss'
+    )
+    xgb_model.fit(X_train, y_train)
+    
+    xgb_pred = xgb_model.predict(X_test)
+    xgb_prob = xgb_model.predict_proba(X_test)[:, 1]
+    
+    xgb_metrics = {
+        "auc_roc": float(roc_auc_score(y_test, xgb_prob)),
+        "precision": float(precision_score(y_test, xgb_pred)),
+        "recall": float(recall_score(y_test, xgb_pred)),
+        "f1": float(f1_score(y_test, xgb_pred)),
+        "accuracy": float(accuracy_score(y_test, xgb_pred))
+    }
+    
+    # Confusion matrix: TN, FP, FN, TP
+    tn, fp, fn, tp = confusion_matrix(y_test, xgb_pred).ravel()
+    xgb_cm = {
+        "tp": int(tp), "fp": int(fp),
+        "fn": int(fn), "tn": int(tn)
+    }
+    
+    # Feature Importances mapping for XGBoost
+    xgb_importance = {col: float(imp) for col, imp in zip(X.columns, xgb_model.feature_importances_)}
+    # Sort and take top 6
+    top_6_features = dict(sorted(xgb_importance.items(), key=lambda item: item[1], reverse=True)[:6])
+    
+    # --- Random Forest Model ---
+    rf_model = RandomForestClassifier(
+        n_estimators=100,
+        max_depth=5,
+        random_state=42
+    )
+    rf_model.fit(X_train, y_train)
+    
+    rf_pred = rf_model.predict(X_test)
+    rf_prob = rf_model.predict_proba(X_test)[:, 1]
+    
+    rf_metrics = {
+        "auc_roc": float(roc_auc_score(y_test, rf_prob)),
+        "precision": float(precision_score(y_test, rf_pred)),
+        "recall": float(recall_score(y_test, rf_pred)),
+        "f1": float(f1_score(y_test, rf_pred)),
+        "accuracy": float(accuracy_score(y_test, rf_pred))
+    }
+    
+    # Save the models
+    with open('xgboost_model.pkl', 'wb') as f:
+        pickle.dump(xgb_model, f)
+    with open('model.pkl', 'wb') as f:  # keep for predict.py
+        pickle.dump(xgb_model, f)
+    with open('rf_model.pkl', 'wb') as f:
+        pickle.dump(rf_model, f)
+        
+    print("Models saved successfully.")
+    
+    # Output metrics for FastAPI
+    metrics_data = {
+        "comparison": {
+            "xgboost": xgb_metrics,
+            "random_forest": rf_metrics
+        },
+        "feature_importance": top_6_features,
+        "confusion_matrix": xgb_cm
+    }
+    
+    with open('metrics.json', 'w') as f:
+        json.dump(metrics_data, f)
+        
+    print("Metrics saved to metrics.json")
+
+if __name__ == "__main__":
+    train()
