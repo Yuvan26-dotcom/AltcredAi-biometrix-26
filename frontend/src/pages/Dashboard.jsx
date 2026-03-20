@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import ShapChart from '../components/ShapChart';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = 'https://altcredai-biometrix-26.onrender.com';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 32 },

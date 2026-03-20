@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ShapChart from '../components/ShapChart';
 import { Link } from 'react-router-dom';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = 'https://altcredai-biometrix-26.onrender.com';
 
 const PERSONAS = [
   {

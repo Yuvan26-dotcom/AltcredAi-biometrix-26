@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 
-const API_BASE = 'http://localhost:8000/model';
+const API_BASE = 'https://altcredai-biometrix-26.onrender.com/model';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -28,7 +28,7 @@ export default function Insights() {
         axios.get(`${API_BASE}/comparison`),
         axios.get(`${API_BASE}/feature-importance`),
         axios.get(`${API_BASE}/confusion-matrix`),
-        axios.get(`http://localhost:8000/applicants`).catch(() => ({ data: [] }))
+        axios.get(`https://altcredai-biometrix-26.onrender.com/applicants`).catch(() => ({ data: [] }))
       ]);
       
       setData({
