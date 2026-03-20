@@ -1,26 +1,72 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: #0f172a; /* slate-900 */
+:root {
+  --bg: #0f0f0f;
+  --bg2: #161616;
+  --bg3: #1e1e1e;
+  --bg4: #252525;
+  --orange: #FF6B2B;
+  --orange-glow: rgba(255,107,43,0.15);
+  --green: #00D68F;
+  --red: #FF4757;
+  --yellow: #FFD32A;
+  --purple: #7B61FF;
+  --text: #F0EDE8;
+  --text2: #A3A09A;
+  --text3: #75736E;
+  --border: #242424;
+  --border2: #2E2E2E;
+  
+  --font-syne: 'Syne', sans-serif;
+  --font-dm: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
-/* Custom scrollbar for deep dark theme */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+body {
+  font-family: var(--font-dm);
+  background-color: var(--bg);
+  color: var(--text);
+  margin: 0;
 }
-::-webkit-scrollbar-track {
-  background: #1e293b; 
+
+/* Subtle grain texture on background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.4;
 }
-::-webkit-scrollbar-thumb {
-  background: #334155; 
-  border-radius: 4px;
+
+/* Top thin line */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--orange);
+  z-index: 9999;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #475569; 
-}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--orange); }
+
+/* Selection color */
+::selection { background: rgba(255,107,43,0.3); color: var(--text); }
+
+/* Typography utility classes */
+.font-syne { font-family: var(--font-syne); }
+.font-dm { font-family: var(--font-dm); }
+.font-mono { font-family: var(--font-mono); }
+
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--orange); }

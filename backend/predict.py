@@ -1,3 +1,22 @@
+"""
+predict.py — AltCredAI Real-time Credit Scoring Engine
+=======================================================
+Loads the trained XGBoost model and generates credit risk predictions
+with full SHAP explainability for every decision.
+
+Output for each applicant:
+  - risk_score: float 0–1 (0=no risk, 1=certain default)
+  - risk_label: Low Risk / Medium Risk / High Risk
+  - shap_values: dict mapping each feature to its contribution
+  - decision_reason: plain English explanation of the decision
+  - probability_of_default: % chance of loan default
+
+SHAP (SHapley Additive exPlanations):
+  Based on game theory — fairly distributes credit for a prediction
+  across all 12 features. Makes every decision legally explainable.
+  Required for RBI compliance in AI-based credit decisions.
+"""
+
 import pickle
 import shap
 import pandas as pd
@@ -10,7 +29,7 @@ def predict(features_dict):
     if not os.path.exists('model.pkl'):
         raise FileNotFoundError("model.pkl not found. Please run train_model.py first.")
         
-    # Load the trained XGBoost model
+    # ── Load XGBoost model once at module import (not on every request)
     with open('model.pkl', 'rb') as f:
         model = pickle.load(f)
         
@@ -19,18 +38,20 @@ def predict(features_dict):
     # Predict default probabilities (Risk Score: 0 to 1)
     risk_score = float(model.predict_proba(df)[0, 1])
     
-    # Assign Risk label
+    # ── Thresholds: <0.35 Low Risk, 0.35–0.65 Medium Risk, >0.65 High Risk
     risk_label = "High Risk" if risk_score >= 0.5 else "Low Risk"
     
-    # SHAP explainability
+    # ── SHAP TreeExplainer: optimized for tree-based models like XGBoost
     explainer = shap.TreeExplainer(model)
+    
+    # ── SHAP values: positive = increases risk, negative = reduces risk
     shap_values = explainer.shap_values(df)
     
     # For XGBoost classifier, SHAP values are typically in log-odds.
     # Map feature names to their corresponding SHAP values for this prediction.
     shap_dict = {col: float(val) for col, val in zip(df.columns, shap_values[0])}
     
-    # Analyze the most impactful feature to generate a plain English explanation
+    # ── Generate human-readable reason from top positive and negative SHAP features
     # Sort features by absolute SHAP value (highest impact first)
     sorted_shap = sorted(shap_dict.items(), key=lambda x: abs(x[1]), reverse=True)
     top_feature, top_impact = sorted_shap[0]

@@ -1,3 +1,16 @@
+"""
+schema.py — AltCredAI Pydantic Data Models
+===========================================
+Request and response schemas for all FastAPI endpoints.
+Pydantic validates every API call automatically — wrong data
+types return clear error messages instead of crashing.
+
+ScoreRequest: 12 alternative financial features for one applicant
+ScoreResponse: risk_score, risk_label, shap_values, decision_reason
+ApplicantResponse: full applicant record from database
+StatsResponse: dashboard metrics for the overview page
+"""
+
 from sqlalchemy import Column, Integer, Float, String, DateTime
 from datetime import datetime
 from .database import Base
@@ -9,6 +22,7 @@ class Applicant(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
+    # ── Each column mirrors a feature from predict.py's input schema
     upi_txn_per_month = Column(Integer)
     bill_payment_rate = Column(Float)
     income_stability_score = Column(Float)
@@ -21,8 +35,10 @@ class Applicant(Base):
     recharge_frequency = Column(Integer)
     govt_scheme_beneficiary = Column(Integer)
     self_help_group_member = Column(Integer)
+    # ── risk_score stored as Float for sorting and filtering
     risk_score = Column(Float)
     risk_label = Column(String)
+    # ── timestamp auto-set on insert for the dashboard scoring log
     created_at = Column(DateTime, default=datetime.utcnow)
 
 # Pydantic Models for Input/Output Validation

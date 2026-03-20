@@ -1,19 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Network, Database, Layers, BrainCircuit, Combine, Target } from 'lucide-react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-} from 'chart.js';
-import { Bar } from 'react-chartjs-2';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
+import { motion } from 'framer-motion';
 
 const API_BASE = 'http://localhost:8000/model';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+};
 
 export default function Insights() {
   const [data, setData] = useState({
@@ -53,145 +47,70 @@ export default function Insights() {
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-brand-500 border-t-transparent"></div>
+        <div className="w-8 h-8 rounded-full border-2 border-[var(--orange)] border-t-transparent animate-spin"></div>
       </div>
     );
   }
 
   const { comparison, importance, matrix, applicants } = data;
 
-  // Chart Setup
-  let chartData = null;
-  let chartOptions = null;
+  const featureMap = {
+    'upi_txn_per_month': 'UPI Transactions',
+    'bill_payment_rate': 'Bill Payment Rate',
+    'income_stability_score': 'Income Stability',
+    'monthly_spend_variance': 'Spend Variance',
+    'cash_flow_ratio': 'Cash Flow Ratio',
+    'digital_wallet_usage': 'Digital Wallet Usage',
+  };
 
+  let importanceData = [];
   if (importance && Object.keys(importance).length > 0) {
-    const featureMap = {
-      'upi_txn_per_month': 'UPI Transactions',
-      'bill_payment_rate': 'Bill Payment Rate',
-      'income_stability_score': 'Income Stability',
-      'monthly_spend_variance': 'Spend Variance',
-      'cash_flow_ratio': 'Cash Flow Ratio',
-      'digital_wallet_usage': 'Digital Wallet Usage',
-    };
-    
-    const labels = Object.keys(importance).map(k => featureMap[k] || k);
-    const impValues = Object.values(importance);
-
-    // Dark orange to light orange based on array index
-    const colors = [
-      '#9a3412', // brand-800
-      '#c2410c', // brand-700
-      '#ea580c', // brand-600
-      '#f97316', // brand-500
-      '#fb923c', // brand-400
-      '#fdba74', // brand-300
-    ].slice(0, impValues.length);
-
-    chartData = {
-      labels,
-      datasets: [{
-        label: 'Relative Importance',
-        data: impValues,
-        backgroundColor: colors,
-        borderRadius: 4,
-      }]
-    };
-
-    chartOptions = {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1e293b',
-          titleColor: '#f1f5f9',
-          bodyColor: '#cbd5e1',
-          padding: 12,
-          displayColors: false,
-        }
-      },
-      scales: {
-        x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
-        y: { grid: { display: false }, ticks: { color: '#e2e8f0', font: {size: 11} } }
-      }
-    };
+    importanceData = Object.entries(importance)
+      .map(([k, v]) => ({ label: featureMap[k] || k, value: parseFloat(v) }))
+      .sort((a,b) => b.value - a.value);
   }
 
-  // Histogram Setup
-  let histData = null;
-  let histOptions = null;
+  let histData = [0, 0, 0, 0, 0];
   if (applicants && applicants.length > 0) {
-    const buckets = [0, 0, 0, 0, 0];
     applicants.forEach(app => {
       const pd = app.risk_score * 100;
-      if (pd < 20) buckets[0]++;
-      else if (pd < 40) buckets[1]++;
-      else if (pd < 60) buckets[2]++;
-      else if (pd < 80) buckets[3]++;
-      else buckets[4]++;
+      if (pd < 20) histData[0]++;
+      else if (pd < 40) histData[1]++;
+      else if (pd < 60) histData[2]++;
+      else if (pd < 80) histData[3]++;
+      else histData[4]++;
     });
-    
-    histData = {
-      labels: ['0-20%', '20-40%', '40-60%', '60-80%', '80-100%'],
-      datasets: [{
-        label: 'Applicants',
-        data: buckets,
-        backgroundColor: '#f97316', // brand-500
-        borderRadius: 4,
-      }]
-    };
-    
-    histOptions = {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1e293b',
-          titleColor: '#f1f5f9',
-          bodyColor: '#cbd5e1',
-          padding: 12,
-          displayColors: false,
-        }
-      },
-      scales: {
-        x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
-        y: { grid: { color: '#334155' }, ticks: { color: '#e2e8f0', precision: 0 } }
-      }
-    };
   }
+  const maxHist = Math.max(...histData) || 1;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500 pb-12">
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="max-w-[1200px] mx-auto space-y-12 pb-16"
+    >
       <div>
-        <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
-          <Network className="w-8 h-8 text-brand-500" /> Model Insights
-        </h1>
-        <p className="text-slate-400 mt-1">Deep dive into algorithm performance and feature reasoning.</p>
+        <h1 className="font-syne text-4xl text-[var(--text)] tracking-tight">Model Insights</h1>
+        <p className="font-dm text-[var(--text2)] mt-2">Deep dive into algorithm performance and feature reasoning.</p>
       </div>
 
       {/* Model Comparison */}
       {comparison && comparison.xgboost && comparison.random_forest && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Combine className="w-5 h-5 text-brand-400" /> Shadow Model Comparison
-          </h2>
+        <motion.div variants={fadeUp} initial="hidden" animate="visible" className="space-y-6">
+          <h2 className="font-dm text-[11px] uppercase tracking-widest text-[var(--text3)] px-2">Shadow Model Comparison</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* XGBoost Card */}
-            <div className="bg-slate-800/60 border-2 border-brand-500/50 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 py-1 px-4 bg-brand-500 text-white text-xs font-bold rounded-bl-xl shadow-md">
-                Active Model
-              </div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-brand-500/20 rounded-lg border border-brand-500/30">
-                  <Database className="w-6 h-6 text-brand-400" />
+            <div className="bg-[var(--bg3)] rounded-[16px] p-8 relative">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="font-syne text-2xl text-[var(--text)]">XGBoost</h3>
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[var(--orange-glow)] rounded text-[10px] font-bold font-dm uppercase tracking-widest text-[var(--orange)]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--orange)]"></span>
+                    ACTIVE
                 </div>
-                <h3 className="text-xl font-bold text-white">XGBoost</h3>
               </div>
               
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <MetricRow label="AUC-ROC" val1={comparison.xgboost.auc_roc} val2={comparison.random_forest.auc_roc} isWinner={comparison.xgboost.auc_roc >= comparison.random_forest.auc_roc} />
                 <MetricRow label="Accuracy" val1={comparison.xgboost.accuracy} val2={comparison.random_forest.accuracy} isWinner={comparison.xgboost.accuracy >= comparison.random_forest.accuracy} />
                 <MetricRow label="Precision" val1={comparison.xgboost.precision} val2={comparison.random_forest.precision} isWinner={comparison.xgboost.precision >= comparison.random_forest.precision} />
@@ -201,15 +120,12 @@ export default function Insights() {
             </div>
 
             {/* Random Forest Card */}
-            <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 shadow-xl">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-slate-700/50 rounded-lg">
-                  <Layers className="w-6 h-6 text-slate-400" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-300">Random Forest</h3>
+            <div className="bg-[var(--bg2)] rounded-[16px] p-8">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="font-syne text-2xl text-[var(--text2)]">Random Forest</h3>
               </div>
               
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <MetricRow label="AUC-ROC" val1={comparison.random_forest.auc_roc} val2={comparison.xgboost.auc_roc} isWinner={comparison.random_forest.auc_roc > comparison.xgboost.auc_roc} />
                 <MetricRow label="Accuracy" val1={comparison.random_forest.accuracy} val2={comparison.xgboost.accuracy} isWinner={comparison.random_forest.accuracy > comparison.xgboost.accuracy} />
                 <MetricRow label="Precision" val1={comparison.random_forest.precision} val2={comparison.xgboost.precision} isWinner={comparison.random_forest.precision > comparison.xgboost.precision} />
@@ -219,106 +135,131 @@ export default function Insights() {
             </div>
 
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Grid for Chart and Matrix */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Feature Importance Chart */}
-        <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 shadow-xl flex flex-col">
-          <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-            <Target className="w-5 h-5 text-brand-400" /> What drives credit decisions
-          </h3>
-          <p className="text-sm text-slate-400 mb-6 border-b border-slate-700 pb-4">
-            Global feature permutation importance for the active XGBoost model.
-          </p>
-          <div className="flex-1 w-full min-h-[300px]">
-             {chartData ? <Bar options={chartOptions} data={chartData} /> : <p className="text-slate-500">No data generated yet.</p>}
+        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once:true }} className="bg-[var(--bg2)] rounded-[16px] p-8 flex flex-col">
+          <h2 className="font-dm text-[11px] uppercase tracking-widest text-[var(--text3)] mb-8">Feature Importance (Active Model)</h2>
+          <div className="flex-1 w-full space-y-4">
+             {importanceData.length > 0 ? (
+               importanceData.map((item, idx) => {
+                 const percent = Math.max(0, Math.min(100, (item.value / importanceData[0].value) * 100));
+                 return (
+                   <div key={item.label} className="group relative flex items-center gap-4">
+                     <div className="w-[120px] text-[10px] font-dm uppercase tracking-widest text-[var(--text2)] text-right group-hover:text-[var(--text)] transition-colors">
+                       {item.label}
+                     </div>
+                     <div className="flex-1 h-3 rounded bg-[var(--bg3)] overflow-hidden">
+                       <motion.div 
+                         initial={{ width: 0 }}
+                         whileInView={{ width: `${percent}%` }}
+                         viewport={{ once: true }}
+                         transition={{ duration: 0.6, delay: idx * 0.1 }}
+                         className="h-full bg-[var(--orange)] rounded group-hover:shadow-[0_0_8px_var(--orange)] opacity-90 group-hover:opacity-100 transition-all"
+                       />
+                     </div>
+                   </div>
+                 );
+               })
+             ) : (
+                <p className="text-[var(--text3)] font-dm text-sm">No data generated yet.</p>
+             )}
           </div>
-        </div>
+        </motion.div>
 
         {/* Confusion Matrix & Distribution */}
         <div className="space-y-6 flex flex-col">
-          <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 shadow-xl flex flex-col">
-            <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-              <BrainCircuit className="w-5 h-5 text-brand-400" /> Active Model Test Matrix
-            </h3>
-            <p className="text-sm text-slate-400 mb-6 border-b border-slate-700 pb-4">
-              Confusion Map showing true validation performance on the 20% holdout set.
-            </p>
+          <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once:true }} className="bg-[var(--bg2)] rounded-[16px] p-8 flex flex-col">
+            <h2 className="font-dm text-[11px] uppercase tracking-widest text-[var(--text3)] mb-8">Confusion Matrix (Validation)</h2>
             
             {matrix ? (
-              <div className="flex-1 flex flex-col justify-center gap-4">
+              <div className="flex-1 flex flex-col justify-center">
                 <div className="grid grid-cols-2 gap-4">
-                  {/* TN (Correctly Approved) Note: label 0 is Non-Default (low risk) */}
-                  <div className="bg-emerald-500/10 border-l-4 border-emerald-500 rounded-lg p-5 flex flex-col items-center justify-center text-center shadow-inner">
-                    <span className="text-3xl font-bold text-emerald-400">{matrix.tn}</span>
-                    <span className="text-xs uppercase font-bold text-emerald-500/80 mt-1">Correctly Approved</span>
-                    <span className="text-[10px] text-slate-400 mt-1">True Negative</span>
+                  {/* TN */}
+                  <div className="aspect-square bg-[var(--bg)] border-[1px] border-[rgba(0,214,143,0.3)] rounded-xl flex flex-col items-center justify-center transition-transform hover:scale-[1.03]">
+                    <span className="text-[32px] font-mono font-bold text-[var(--text)] mb-2">{matrix.tn}</span>
+                    <span className="text-[10px] font-dm uppercase tracking-widest text-[var(--green)] text-center">True Negative<br/>(Correctly Approved)</span>
                   </div>
                   
-                  {/* FP (False Approval) */}
-                  <div className="bg-red-500/10 border-l-4 border-red-500 rounded-lg p-5 flex flex-col items-center justify-center text-center shadow-inner">
-                    <span className="text-3xl font-bold text-red-500">{matrix.fp}</span>
-                    <span className="text-xs uppercase font-bold text-red-500/80 mt-1">False Approval</span>
-                    <span className="text-[10px] text-slate-400 mt-1">False Positive</span>
+                  {/* FP */}
+                  <div className="aspect-square bg-[var(--bg)] border-[1px] border-[rgba(255,71,87,0.3)] rounded-xl flex flex-col items-center justify-center transition-transform hover:scale-[1.03]">
+                    <span className="text-[32px] font-mono font-bold text-[var(--text)] mb-2">{matrix.fp}</span>
+                    <span className="text-[10px] font-dm uppercase tracking-widest text-[var(--red)] text-center">False Positive<br/>(False Approval)</span>
                   </div>
                   
-                  {/* FN (Missed Approval) */}
-                  <div className="bg-red-500/10 border-l-4 border-red-500 rounded-lg p-5 flex flex-col items-center justify-center text-center shadow-inner">
-                    <span className="text-3xl font-bold text-red-500">{matrix.fn}</span>
-                    <span className="text-xs uppercase font-bold text-red-500/80 mt-1">Missed Approval</span>
-                    <span className="text-[10px] text-slate-400 mt-1">False Negative</span>
+                  {/* FN */}
+                  <div className="aspect-square bg-[var(--bg)] border-[1px] border-[rgba(255,71,87,0.3)] rounded-xl flex flex-col items-center justify-center transition-transform hover:scale-[1.03]">
+                    <span className="text-[32px] font-mono font-bold text-[var(--text)] mb-2">{matrix.fn}</span>
+                    <span className="text-[10px] font-dm uppercase tracking-widest text-[var(--red)] text-center">False Negative<br/>(Missed Approval)</span>
                   </div>
                   
-                  {/* TP (Correctly Rejected) Note: label 1 is Default (High risk) */}
-                  <div className="bg-emerald-500/10 border-l-4 border-emerald-500 rounded-lg p-5 flex flex-col items-center justify-center text-center shadow-inner">
-                    <span className="text-3xl font-bold text-emerald-400">{matrix.tp}</span>
-                    <span className="text-xs uppercase font-bold text-emerald-500/80 mt-1">Correctly Rejected</span>
-                    <span className="text-[10px] text-slate-400 mt-1">True Positive</span>
+                  {/* TP */}
+                  <div className="aspect-square bg-[var(--bg)] border-[1px] border-[rgba(0,214,143,0.3)] rounded-xl flex flex-col items-center justify-center transition-transform hover:scale-[1.03]">
+                    <span className="text-[32px] font-mono font-bold text-[var(--text)] mb-2">{matrix.tp}</span>
+                    <span className="text-[10px] font-dm uppercase tracking-widest text-[var(--green)] text-center">True Positive<br/>(Correctly Rejected)</span>
                   </div>
                 </div>
               </div>
             ) : (
-              <p className="text-slate-500">No matrix generated yet.</p>
+              <p className="text-[var(--text3)] font-dm text-sm">No matrix generated yet.</p>
             )}
-          </div>
+          </motion.div>
 
-          <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 shadow-xl flex flex-col flex-1">
-            <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-              <Network className="w-5 h-5 text-brand-400" /> Default Rate Distribution
-            </h3>
-            <p className="text-sm text-slate-400 mb-6 border-b border-slate-700 pb-4">
-              Distribution of Probability of Default (PD) across all scored applicants.
-            </p>
-            <div className="flex-1 w-full min-h-[160px]">
-               {histData ? <Bar options={histOptions} data={histData} /> : <p className="text-slate-500">No applicants scored yet.</p>}
+          <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once:true }} className="bg-[var(--bg2)] rounded-[16px] p-8 flex flex-col flex-1">
+            <h2 className="font-dm text-[11px] uppercase tracking-widest text-[var(--text3)] mb-6">Probability of Default Distribution</h2>
+            <div className="flex-1 w-full h-[150px] flex items-end gap-2 px-4 border-b border-[var(--bg4)] pb-1">
+                {histData.map((val, idx) => (
+                    <div key={idx} className="flex-1 flex flex-col items-center group relative">
+                        <div className="absolute -top-7 text-[10px] font-mono text-[var(--text)] opacity-0 group-hover:opacity-100 transition-opacity">{val}</div>
+                        <motion.div 
+                            initial={{ height: 0 }}
+                            whileInView={{ height: `${(val / maxHist) * 100}%` }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: idx * 0.1 }}
+                            className="w-full bg-[var(--text3)] rounded-t hover:bg-[var(--orange)] transition-colors"
+                        />
+                    </div>
+                ))}
             </div>
-          </div>
+            <div className="flex justify-between mt-3 font-mono text-[10px] text-[var(--text3)]">
+                <span>0%</span>
+                <span>20%</span>
+                <span>40%</span>
+                <span>60%</span>
+                <span>80%</span>
+                <span>100%</span>
+            </div>
+          </motion.div>
         </div>
 
       </div>
 
-    </div>
+    </motion.div>
   );
 }
 
-// Helper component for metric rows
 function MetricRow({ label, val1, val2, isWinner }) {
-  const valueClass = isWinner ? "text-emerald-400 font-bold" : "text-slate-300 font-medium";
-  const barWidth = `${Math.min(val1 * 100, 100)}%`;
+  const valueColor = isWinner ? 'var(--orange)' : 'var(--text2)';
+  const labelColor = isWinner ? 'var(--text)' : 'var(--text2)';
   
   return (
-    <div>
-      <div className="flex justify-between text-sm mb-1.5">
-        <span className="text-slate-400 font-medium">{label}</span>
-        <span className={valueClass}>{(val1 * 100).toFixed(1)}%</span>
+    <div className="group">
+      <div className="flex justify-between items-center mb-2">
+        <span className="font-dm text-[12px] font-medium transition-colors" style={{ color: labelColor }}>{label}</span>
+        <span className="font-mono text-[13px] transition-colors" style={{ color: valueColor }}>{(val1 * 100).toFixed(1)}%</span>
       </div>
-      <div className="w-full h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
-        <div 
-          className={`h-full ${isWinner ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-500'}`} 
-          style={{ width: barWidth }}
+      <div className="w-full h-[2px] bg-[var(--bg3)] rounded-full overflow-hidden">
+        <motion.div 
+          initial={{ width: 0 }}
+          whileInView={{ width: `${Math.min(val1 * 100, 100)}%` }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="h-full rounded-full transition-colors"
+          style={{ backgroundColor: valueColor }}
         />
       </div>
     </div>
