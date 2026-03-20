@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import ShapChart from '../components/ShapChart';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = 'https://altcredai-biometrix-26.onrender.com';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 32 },
@@ -175,7 +175,7 @@ export default function Dashboard() {
         transition={{ duration: 0.25 }}
         className="max-w-[1400px] mx-auto space-y-12"
       >
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h1 className="font-syne text-4xl text-[var(--text)] tracking-tight">Platform Overview</h1>
             <p className="font-dm text-[var(--text2)] mt-2">Real-time alternative credit intelligence metrics.</p>
@@ -221,7 +221,8 @@ export default function Dashboard() {
             <motion.div variants={fadeUp}>
               <h2 className="font-dm text-[11px] uppercase tracking-widest text-[var(--text3)] mb-4 px-2">Recent Scoring Log</h2>
               
-              <div className="space-y-1">
+              <div className="overflow-x-auto pb-4 custom-scrollbar">
+                <div className="space-y-1 min-w-[700px]">
                 <div className="flex text-left font-dm text-[10px] uppercase tracking-widest text-[var(--text3)] px-4 py-2 border-b border-[var(--border)] mb-2">
                     <div className="w-[30%]">Applicant Name</div>
                     <div className="w-[20%] text-center">Score</div>
@@ -305,6 +306,7 @@ export default function Dashboard() {
                     );
                   })
                 )}
+                </div>
               </div>
             </motion.div>
           </motion.div>

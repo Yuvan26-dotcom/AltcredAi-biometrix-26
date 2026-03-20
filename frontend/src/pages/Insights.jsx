@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 
-const API_BASE = 'http://localhost:8000/model';
+const API_BASE = 'https://altcredai-biometrix-26.onrender.com/model';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -28,7 +28,7 @@ export default function Insights() {
         axios.get(`${API_BASE}/comparison`),
         axios.get(`${API_BASE}/feature-importance`),
         axios.get(`${API_BASE}/confusion-matrix`),
-        axios.get(`http://localhost:8000/applicants`).catch(() => ({ data: [] }))
+        axios.get(`https://altcredai-biometrix-26.onrender.com/applicants`).catch(() => ({ data: [] }))
       ]);
       
       setData({
@@ -102,7 +102,7 @@ export default function Insights() {
             
             {/* XGBoost Card */}
             <div className="bg-[var(--bg3)] rounded-[16px] p-8 relative">
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4 sm:gap-0">
                 <h3 className="font-syne text-2xl text-[var(--text)]">XGBoost</h3>
                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[var(--orange-glow)] rounded text-[10px] font-bold font-dm uppercase tracking-widest text-[var(--orange)]">
                     <span className="w-1.5 h-1.5 rounded-full bg-[var(--orange)]"></span>
@@ -121,7 +121,7 @@ export default function Insights() {
 
             {/* Random Forest Card */}
             <div className="bg-[var(--bg2)] rounded-[16px] p-8">
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4 sm:gap-0">
                 <h3 className="font-syne text-2xl text-[var(--text2)]">Random Forest</h3>
               </div>
               
