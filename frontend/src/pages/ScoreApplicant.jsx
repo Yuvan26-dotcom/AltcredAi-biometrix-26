@@ -231,7 +231,7 @@ export default function ScoreApplicant() {
             {/* AA Fetch Section */}
             <div className="space-y-4 pt-4 border-t border-[var(--bg4)]">
               <h2 className="font-dm text-[11px] uppercase tracking-widest text-[var(--text3)]">Simulate Account Aggregator Flow</h2>
-              <div className="flex gap-4">
+              <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 relative">
                   <input 
                     type="text" 
@@ -312,7 +312,7 @@ export default function ScoreApplicant() {
                   <button
                     key={p.id}
                     onClick={() => handlePersonaClick(p)}
-                    className="group flex items-center justify-between w-full text-left py-3 px-2 transition-transform hover:translate-x-1"
+                    className="group flex flex-col sm:flex-row sm:items-center justify-between w-full text-left py-4 sm:py-3 px-2 transition-transform hover:translate-x-1 border border-[var(--border)] sm:border-transparent rounded-lg sm:rounded-none mb-2 sm:mb-0"
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-[2px] h-8 bg-[var(--orange)] rounded" />
@@ -324,7 +324,7 @@ export default function ScoreApplicant() {
                         <div className="font-dm text-[12px] text-[var(--text3)]">{p.tagline}</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-6 mt-4 sm:mt-0 pl-12 sm:pl-0">
                       <div className="font-mono text-[14px] text-[var(--text2)] text-right w-[60px]">{p.demoScore}</div>
                       <div className="font-syne text-[12px] font-bold text-[var(--orange)] opacity-0 group-hover:opacity-100 transition-opacity">
                         Load profile →
@@ -390,7 +390,7 @@ export default function ScoreApplicant() {
             transition={{ type: "spring", stiffness: 200, damping: 20 }}
             className="space-y-12 pb-10 max-w-[800px] mx-auto"
           >
-            <div className="flex justify-between items-center group">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group">
               <button 
                 onClick={() => setResult(null)}
                 className="font-dm text-[12px] text-[var(--text3)] group-hover:text-[var(--orange)] transition-colors flex items-center gap-2"
@@ -398,7 +398,7 @@ export default function ScoreApplicant() {
                 <span className="text-[var(--orange)] opacity-0 group-hover:opacity-100 transition-opacity">←</span> Edit Profile
               </button>
               
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                 <select 
                   onChange={(e) => {
                     const SCORE_ANNOUNCE = {

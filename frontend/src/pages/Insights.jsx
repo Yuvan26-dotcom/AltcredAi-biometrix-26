@@ -102,7 +102,7 @@ export default function Insights() {
             
             {/* XGBoost Card */}
             <div className="bg-[var(--bg3)] rounded-[16px] p-8 relative">
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4 sm:gap-0">
                 <h3 className="font-syne text-2xl text-[var(--text)]">XGBoost</h3>
                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[var(--orange-glow)] rounded text-[10px] font-bold font-dm uppercase tracking-widest text-[var(--orange)]">
                     <span className="w-1.5 h-1.5 rounded-full bg-[var(--orange)]"></span>
@@ -121,7 +121,7 @@ export default function Insights() {
 
             {/* Random Forest Card */}
             <div className="bg-[var(--bg2)] rounded-[16px] p-8">
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4 sm:gap-0">
                 <h3 className="font-syne text-2xl text-[var(--text2)]">Random Forest</h3>
               </div>
               

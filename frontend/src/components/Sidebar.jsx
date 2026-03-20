@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 
 export default function Sidebar() {
   return (
-    <aside className="w-[220px] bg-[var(--bg)] border-r border-[#1e1e1e] flex-col hidden md:flex h-full">
-      <div className="p-6 pb-8 border-b border-[#1e1e1e]/50">
+    <aside className="w-full md:w-[220px] bg-[var(--bg)] border-t md:border-t-0 md:border-r border-[#1e1e1e] flex flex-row md:flex-col fixed bottom-0 left-0 md:relative h-[60px] md:h-full z-50">
+      <div className="hidden md:block p-6 pb-8 border-b border-[#1e1e1e]/50">
         <div className="font-syne font-[800] text-xl tracking-tight text-[var(--text)]">
           AltCred<span className="text-[var(--orange)]">AI</span>
         </div>
@@ -14,7 +14,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 px-4 py-8 space-y-1">
+      <nav className="flex-1 flex flex-row md:flex-col px-2 md:px-4 py-0 md:py-8 space-y-0 md:space-y-1 space-x-2 md:space-x-0 overflow-x-auto items-center justify-around md:justify-start h-full md:h-auto">
         {[
           { path: '/', label: 'Dashboard' },
           { path: '/score', label: 'Score Applicant' },
@@ -24,7 +24,7 @@ export default function Sidebar() {
             key={item.path}
             to={item.path}
             className={({ isActive }) =>
-              `relative flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-150 font-dm text-[13px] ${
+              `relative flex items-center justify-center gap-2 md:gap-3 px-3 md:px-4 py-3 md:py-3 rounded-lg transition-all duration-150 font-dm text-[11px] md:text-[13px] whitespace-nowrap ${
                 isActive 
                   ? 'text-[var(--text)]' 
                   : 'text-[var(--text3)] hover:text-[var(--text2)]'
@@ -56,7 +56,7 @@ export default function Sidebar() {
         ))}
       </nav>
       
-      <div className="p-4 border-t border-[#1e1e1e]/50">
+      <div className="hidden md:block p-4 border-t border-[#1e1e1e]/50">
         <div className="bg-[#161616] p-4 rounded-xl">
           <div className="flex justify-between items-center mb-2">
             <span className="font-mono text-[11px] text-[var(--orange)]">XGBoost v2.1</span>
